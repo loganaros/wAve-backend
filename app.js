@@ -21,11 +21,11 @@ const pool = new Pool({
 });
 
 // Middleware
-app.use(cors({
-    origin: 'http://localhost:3000', // Your frontend's origin
-    methods: ['GET', 'POST', 'DELETE', 'PUT'], // Allowed methods
-    credentials: true, // Enable cookies if needed
-}));
+// app.use(cors({
+//     origin: 'http://localhost:3000', // Your frontend's origin
+//     methods: ['GET', 'POST', 'DELETE', 'PUT'], // Allowed methods
+//     credentials: true, // Enable cookies if needed
+// }));
 app.use(express.json());
 
 // Utility function to get Spotify API access token
