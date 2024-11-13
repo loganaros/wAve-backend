@@ -1,4 +1,3 @@
-// app.js
 require('dotenv').config(); // Load environment variables
 const express = require('express');
 const { body, validationResult } = require('express-validator');
@@ -12,7 +11,7 @@ const authenticateToken = require('./middleware/authenticateToken')
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Initialize PostgreSQL pool with environment variable DATABASE_URL
+// Initialize database
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
@@ -22,13 +21,13 @@ const pool = new Pool({
 
 // Middleware
 app.use(cors({
-    origin: 'https://wave-frontend-liart.vercel.app', // Your frontend's origin
-    methods: ['GET', 'POST', 'DELETE', 'PUT'], // Allowed methods
-    credentials: true, // Enable cookies if needed
+    origin: 'https://wave-frontend-liart.vercel.app',
+    methods: ['GET', 'POST', 'DELETE', 'PUT'],
+    credentials: true,
 }));
 app.use(express.json());
 
-// Utility function to get Spotify API access token
+// Get Spofity access token
 async function getSpotifyAccessToken() {
     const clientId = process.env.SPOTIFY_CLIENT_ID;
     const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -47,6 +46,7 @@ async function getSpotifyAccessToken() {
     return data.access_token;
 }
 
+// Route to get Spotify access token
 app.get('/api/spotify-token', async (req, res) => {
     const clientId = process.env.SPOTIFY_CLIENT_ID;
     const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -75,8 +75,10 @@ app.get('/api/spotify-token', async (req, res) => {
 
 // USER
 
+// Login route
 app.post('/api/login', 
     [
+      // validation logic
       body('email').isEmail().withMessage('Please provide a valid email'),
       body('password').notEmpty().withMessage('Password is required'),
     ],
@@ -104,7 +106,7 @@ app.post('/api/login',
           return res.status(400).json({ error: 'Invalid credentials' });
         }
   
-        // Generate JWT token
+        // Generate token
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
   
         // Send back user information and token
@@ -116,9 +118,9 @@ app.post('/api/login',
     }
   );
   
-
+// Registration route
 app.post('/api/register',
-    // Input validation using express-validator
+    // Input validation
     [
         body('username').isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
         body('email').isEmail().withMessage('Enter a valid email'),
@@ -151,7 +153,7 @@ app.post('/api/register',
 
             const user = result.rows[0];
 
-            // Generate JWT token
+            // Generate token
             const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
             res.status(201).json({ token, user });
@@ -161,34 +163,6 @@ app.post('/api/register',
         }
     }
 );
-
-app.post('/api/login', async (req, res) => {
-    const { email, password } = req.body;
-
-    try {
-        // Check if user exists
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-        if (result.rows.length === 0) {
-            return res.status(400).json({ error: 'Invalid credentials' });
-        }
-
-        const user = result.rows[0];
-
-        // Compare passwords
-        const isMatch = await bcrypt.compare(password, user.password_hash);
-        if (!isMatch) {
-            return res.status(400).json({ error: 'Invalid credentials' });
-        }
-
-        // Generate JWT token
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-        res.json({ token, user: { id: user.id, username: user.username, email: user.email } });
-    } catch (error) {
-        console.error('Error logging in user:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
 
 // COMMENTS
 
@@ -215,7 +189,7 @@ app.post('/api/posts/:postId/comments', authenticateToken, async (req, res) => {
     }
 });
 
-// Retrieve All Comments for a Post
+// Retrieve all comments for a Post
 app.get('/api/posts/:postId/comments', async (req, res) => {
     const { postId } = req.params;
 
@@ -237,7 +211,7 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
     }
 });
 
-// Delete a Comment
+// Delete a comment
 app.delete('/api/comments/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
 
