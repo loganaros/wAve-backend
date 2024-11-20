@@ -10,6 +10,8 @@ const { Pool } = require('pg');
 const authenticateToken = require('./middleware/authenticateToken')
 const app = express();
 const PORT = process.env.PORT || 5000;
+// const ORIGIN = 'https://wave-frontend-liart.vercel.app'
+const ORIGIN = 'http://localhost:3000'
 
 // Initialize database
 const pool = new Pool({
@@ -21,7 +23,7 @@ const pool = new Pool({
 
 // Middleware
 app.use(cors({
-    origin: 'https://wave-frontend-liart.vercel.app',
+    origin: ORIGIN,
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
     credentials: true,
 }));
@@ -341,3 +343,5 @@ app.delete('/api/posts/:id', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+module.exports = app;
