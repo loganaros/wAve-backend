@@ -10,14 +10,14 @@ const { Pool } = require('pg');
 const authenticateToken = require('./middleware/authenticateToken')
 const app = express();
 const PORT = process.env.PORT || 5000;
-// const ORIGIN = 'https://wave-frontend-liart.vercel.app'
-const ORIGIN = 'http://localhost:3000'
+const ORIGIN = 'https://wave-frontend-liart.vercel.app'
+// const ORIGIN = 'http://localhost:3000'
 
 // Initialize database
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
-        rejectUnauthorized: false, // Required for Heroku Postgres SSL connection
+        rejectUnauthorized: false,
     },
 });
 
